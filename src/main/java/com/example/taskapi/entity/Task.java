@@ -1,26 +1,34 @@
-package com.example.taskapi.model;
+package com.example.taskapi.entity;
 
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "tasks")
 public class Task {
 
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(nullable = false)
     private String title;
+
+    @Column(nullable = false)
     private boolean done;
 
     public Task() {
     }
 
-    public Task(int id, String title, boolean done) {
-        this.id = id;
+    public Task(String title, boolean done) {
         this.title = title;
         this.done = done;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

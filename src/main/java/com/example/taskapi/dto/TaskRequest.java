@@ -1,4 +1,4 @@
-package com.example.taskapi.model;
+package com.example.taskapi.dto;
 
 public class TaskRequest {
 

@@ -1,120 +1,61 @@
 package com.example.taskapi.controller;
 
-import com.example.taskapi.model.Task;
-import com.example.taskapi.model.TaskRequest;
+import com.example.taskapi.dto.TaskRequest;
+import com.example.taskapi.entity.Task;
+import com.example.taskapi.service.TaskService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 public class TaskController {
 
-    private final List<Task> tasks = new ArrayList<>();
+    private final TaskService service;
 
-    private int nextId = 1;
+    public TaskController(TaskService service) {
+        this.service = service;
+    }
 
     @GetMapping("/")
     public Map<String, Object> home() {
-
-        Map<String, Object> response = new HashMap<>();
-
-        response.put("message", "Task API is running");
-        response.put("version", "1.0");
-
-        return response;
+        return Map.of(
+                "message", "Task API is running",
+                "version", "2.0"
+        );
     }
 
     @GetMapping("/health")
     public Map<String, String> health() {
-
         return Map.of("status", "ok");
     }
 
     @GetMapping("/tasks")
     public List<Task> getTasks() {
-        return tasks;
+        return service.getAllTasks();
     }
 
     @GetMapping("/tasks/{id}")
-    public Task getTaskById(@PathVariable int id) {
-
-        for (Task task : tasks) {
-            if (task.getId() == id) {
-                return task;
-            }
-        }
-
-        throw new ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Task not found"
-        );
+    public Task getTask(@PathVariable Integer id) {
+        return service.getTaskById(id);
     }
 
     @PostMapping("/tasks")
     @ResponseStatus(HttpStatus.CREATED)
     public Task createTask(@RequestBody TaskRequest request) {
-
-        if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
-
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Title is required"
-            );
-        }
-
-        Task task = new Task(
-                nextId++,
-                request.getTitle(),
-                false
-        );
-
-        tasks.add(task);
-
-        return task;
+        return service.createTask(request);
     }
 
     @PutMapping("/tasks/{id}")
-    public Task updateTask(@PathVariable int id,
+    public Task updateTask(@PathVariable Integer id,
                            @RequestBody TaskRequest request) {
-
-        if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
-
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Title is required"
-            );
-        }
-
-        for (Task task : tasks) {
-
-            if (task.getId() == id) {
-
-                task.setTitle(request.getTitle());
-
-                return task;
-            }
-        }
-
-        throw new ResponseStatusException(
-                HttpStatus.NOT_FOUND,
-                "Task not found"
-        );
+        return service.updateTask(id, request);
     }
 
     @DeleteMapping("/tasks/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTask(@PathVariable int id) {
-
-        boolean removed = tasks.removeIf(task -> task.getId() == id);
-
-        if (!removed) {
-
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "Task not found"
-            );
-        }
+    public void deleteTask(@PathVariable Integer id) {
+        service.deleteTask(id);
     }
 }
